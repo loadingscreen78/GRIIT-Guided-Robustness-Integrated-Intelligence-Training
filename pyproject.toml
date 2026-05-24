@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "griit"
+version = "0.1.0"
+description = "Griit command-line tool."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Griit Maintainers" },
+]
+keywords = ["griit", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "numpy>=1.21",
+    "albumentations>=1.4,<2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pandas>=1.5",
+    "scikit-learn>=1.0",
+    "joblib>=1.2",
+]
+torch = [
+    "torch>=1.10",
+]
+sklearn = [
+    "scikit-learn>=1.0",
+]
+keras = [
+    "keras>=3.0",
+]
+tabular = [
+    "pandas>=1.5",
+]
+
+[project.scripts]
+griit = "griit.cli:main"
+
+[project.urls]
+Homepage = "https://example.com/griit"
+Source = "https://example.com/griit"
+Issues = "https://example.com/griit/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/griit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
