@@ -736,3 +736,69 @@ If GRIIT helped you, please star the repo! ⭐
 **Made with ❤️ by the GRIIT Team**
 
 *Making AI production-ready, automatically.*
+
+---
+
+## 🛠️ Current Implementation Status
+
+This repo currently ships the **foundation phases (1–5)** that the public API is built on. The high-level `GRIIT(...)` facade and web-search integration shown above are still being wired up.
+
+### What works today
+
+| Module | Description |
+|---|---|
+| `griit.adapters` | Framework-agnostic `ModelAdapter` with auto-detection across PyTorch / scikit-learn / Keras |
+| `griit.generators.ImageGenerator` | 8 albumentations-backed augmentations (low light, blur, noise, fog/rain, rotation, occlusion, JPEG, color shift) |
+| `griit.generators.TextGenerator` | Typos, case changes, synonym swap, emoji injection, truncation, padding |
+| `griit.generators.TabularGenerator` | Null injection, outlier injection, column shuffle, new categorical values |
+| `griit.generators.VideoGenerator` | Frame drop, compression artifacts, temporal jitter |
+| `griit.tester.StressTester` | Batched evaluation, weighted robustness score, failure-category breakdown, console summary |
+| `griit.trainer.Retrainer` | Curriculum / adversarial / adaptive ordering, framework-aware fine-tune, checkpoint + safe rollback |
+
+### Quick start (current API)
+
+```bash
+pip install -e ".[dev]"
+```
+
+```python
+import numpy as np
+from sklearn.linear_model import SGDClassifier
+from griit import ImageGenerator, StressTester, Retrainer
+from griit.adapters import wrap_model
+
+# 1. Wrap your model in a framework-agnostic adapter.
+model = SGDClassifier(loss="log_loss").fit(X_train, y_train)
+adapter = wrap_model(model)
+
+# 2. Generate augmented edge cases.
+gen = ImageGenerator(random_state=42, severity="medium")
+samples = gen.generate(images, labels, n_per_category=500)
+
+# 3. Stress-test and inspect.
+tester = StressTester(adapter, baseline_data=(X_val, y_val))
+report = tester.run(samples)
+tester.summary()
+
+# 4. Retrain on the failures with safe rollback.
+trainer = Retrainer(adapter, strategy="curriculum", min_baseline_accuracy=0.8)
+result = trainer.retrain(report.results_by_category["blur"].failed_samples,
+                         baseline_data=(X_val, y_val))
+print("rolled back:", result.rolled_back)
+```
+
+### CLI
+
+```bash
+griit --version
+griit --help
+```
+
+### Development
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+The current suite covers adapter routing, every generator category, the stress-tester score formula and grouping, and the retrainer's checkpoint / rollback paths for both PyTorch and scikit-learn.
